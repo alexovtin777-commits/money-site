@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мои деньги и задачи</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      padding: 15px;
+    }
+
+    .box {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 16px;
+      margin-bottom: 15px;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      background: #22c55e;
+      color: white;
+      font-weight: bold;
+    }
+
+    .red {
+      background: #dc2626;
+    }
+
+    .balance {
+      font-size: 28px;
+      text-align: center;
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .day {
+      margin-top: 15px;
+      padding: 12px;
+      background: #334155;
+      border-radius: 14px;
+    }
+
+    .task {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      align-items: center;
+    }
+
+    .task input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+    }
+
+    .task input[type="text"] {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Мои деньги</h1>
+
+  <div class="box">
+    <div class="balance" id="balance">0 ₽</div>
+
+    <input type="number" id="amount" placeholder="Введите сумму">
+
+    <button onclick="addIncome()">Добавить доход</button>
+    <button class="red" onclick="addExpense()">Добавить расход</button>
+  </div>
+
+  <div class="box">
+    <h2>Задачи на неделю</h2>
+    <div id="tasks"></div>
+    <button onclick="saveData()">Сохранить</button>
+  </div>
+
+<script>
+  let balance = Number(localStorage.getItem("balance")) || 0;
+
+  const days = [
+    "Понедельник", "Вторник", "Среда", "Четверг",
+    "Пятница", "Суббота", "Воскресенье"
+  ];
+
+  function updateBalance() {
+    document.getElementById("balance").innerText = balance + " ₽";
+    localStorage.setItem("balance", balance);
+  }
+
+  function addIncome() {
+    let amount = Number(document.getElementById("amount").value);
+    if (!amount) return alert("Введите сумму");
+    balance += amount;
+    document.getElementById("amount").value = "";
+    updateBalance();
+  }
+
+  function addExpense() {
+    let amount = Number(document.getElementById("amount").value);
+    if (!amount) return alert("Введите сумму");
+    balance -= amount;
+    document.getElementById("amount").value = "";
+    updateBalance();
+  }
+
+  function createTasks() {
+    const tasksDiv = document.getElementById("tasks");
+
+    days.forEach(day => {
+      const dayBlock = document.createElement("div");
+      dayBlock.className = "day";
+
+      const title = document.createElement("h3");
+      title.innerText = day;
+      dayBlock.appendChild(title);
+
+      for (let i = 1; i <= 5; i++) {
+        const row = document.createElement("div");
+        row.className = "task";
+
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.id = `${day}_check_${i}`;
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = `Задача ${i}`;
+        input.id = `${day}_task_${i}`;
+
+        row.appendChild(check);
+        row.appendChild(input);
+        dayBlock.appendChild(row);
+      }
+
+      tasksDiv.appendChild(dayBlock);
+    });
+  }
+
+  function saveData() {
+    days.forEach(day => {
+      for (let i = 1; i <= 5; i++) {
+        localStorage.setItem(`${day}_task_${i}`, document.getElementById(`${day}_task_${i}`).value);
+        localStorage.setItem(`${day}_check_${i}`, document.getElementById(`${day}_check_${i}`).checked);
+      }
+    });
+
+    alert("Сохранено ✅");
+  }
+
+  function loadData() {
+    days.forEach(day => {
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById(`${day}_task_${i}`).value =
+          localStorage.getItem(`${day}_task_${i}`) || "";
+
+        document.getElementById(`${day}_check_${i}`).checked =
+          localStorage.getItem(`${day}_check_${i}`) === "true";
+      }
+    });
+  }
+
+  createTasks();
+  loadData();
+  updateBalance();
+</script>
+
+</body>
+</html>
